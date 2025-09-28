@@ -1,0 +1,6 @@
+.venv
+chroma_*
+chroma
+.DS_Store
+.history/
+.env
