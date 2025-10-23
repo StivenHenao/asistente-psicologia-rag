@@ -3,4 +3,6 @@ chroma_*
 chroma
 .DS_Store
 .history/
+.envu
+uv.lock
 .env
