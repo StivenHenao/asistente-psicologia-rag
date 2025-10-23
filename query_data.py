@@ -1,11 +1,12 @@
-import os
 import argparse
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.prompts import ChatPromptTemplate
+import os
+import warnings
+
 import google.generativeai as genai
 from dotenv import load_dotenv
-import warnings
+from langchain.prompts import ChatPromptTemplate
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 

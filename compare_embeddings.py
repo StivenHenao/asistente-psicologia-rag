@@ -1,8 +1,9 @@
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain.evaluation import load_evaluator
-from dotenv import load_dotenv
-import google.generativeai as genai
 import os
+
+import google.generativeai as genai
+from dotenv import load_dotenv
+from langchain.evaluation import load_evaluator
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 # Load environment variables
 load_dotenv()
