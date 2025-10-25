@@ -4,7 +4,8 @@ import shutil
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import DirectoryLoader
-from langchain_community.embeddings import HuggingFaceEmbeddings  # Cambia esta línea
+from langchain_community.embeddings import \
+    HuggingFaceEmbeddings  # Cambia esta línea
 from langchain_community.vectorstores import Chroma
 
 CHROMA_PATH = "chroma"
