@@ -1,8 +1,30 @@
-.venv
-chroma_*
-chroma
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# Archivos de dependencias
+uv.lock
+requirements.txt
+
+# Archivos de configuración sensibles
+.env
+.envu
+
+# Directorios de cache y compilados
+__pycache__/
+*.pyc
+*.pyo
+
+# Archivos temporales o de sistema
 .DS_Store
 .history/
-.envu
-uv.lock
-.env
+*.log
+
+# Directorios de datos de Chroma o similares
+chroma/
+chroma_*
+
+# Archivos o carpetas locales (no subir al repo)
+.chatbot/
+.notebooks/

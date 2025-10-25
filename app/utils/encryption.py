@@ -1,7 +1,6 @@
 from cryptography.fernet import Fernet
 import os, json
 
-# Cargamos la misma clave desde entorno (usa la misma que tu contexto)
 key = os.getenv("CONTEXT_ENCRYPTION_KEY")
 if not key:
     raise ValueError("❌ Falta la variable de entorno CONTEXT_ENCRYPTION_KEY")
@@ -14,7 +13,11 @@ def encrypt_text(text: str) -> str:
 
 def decrypt_text(token: str) -> str:
     """Descifra un texto cifrado"""
-    return fernet.decrypt(token.encode()).decode()
+    try:
+        return fernet.decrypt(token.encode()).decode()
+    except Exception as e:
+        print(f"❌ Error al descifrar token: {token[:50]}... -> {e}")
+        raise
 
 def encrypt_context(context_dict):
     data = json.dumps(context_dict)
