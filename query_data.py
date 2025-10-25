@@ -1,11 +1,12 @@
-import os
 import argparse
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.prompts import ChatPromptTemplate
+import os
+import warnings
+
 import google.generativeai as genai
 from dotenv import load_dotenv
-import warnings
+from langchain.prompts import ChatPromptTemplate
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -30,6 +31,7 @@ Si no sabes la respuesta, di "No lo sé". Sé conciso y directo al punto.
 Si es una pregunta nada ofensiva o dañina, responde de manera creativa y útil.
 """
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("query_text", type=str, help="The query text.")
@@ -40,7 +42,7 @@ def main():
     embedding_function = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
-    
+
     db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
 
     # Búsqueda
@@ -57,21 +59,22 @@ def main():
     context_text = "\n\n---\n\n".join([doc.page_content for doc in filtered_results])
     prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
     prompt = prompt_template.format(context=context_text, question=query_text)
-    
+
     # Configurar Gemini
-    genai.configure(api_key=os.environ.get('GEMINI_API_KEY', ''))
-    
+    genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
+
     try:
         model = genai.GenerativeModel("models/gemini-2.5-flash")
         response = model.generate_content(prompt)
-        
+
         # sources = [doc.metadata.get("source", None) for doc in filtered_results]
         print(f"Respuesta: {response.text}")
         # print(f"Fuentes: {sources}")
-        
+
     except Exception as e:
         print(f"Error con Gemini: {e}")
         print("Respuesta basada en el contexto no disponible.")
+
 
 if __name__ == "__main__":
     main()
