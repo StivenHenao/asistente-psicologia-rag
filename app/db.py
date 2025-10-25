@@ -1,6 +1,7 @@
 import os
-import psycopg2
 from urllib.parse import urlparse
+
+import psycopg2
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,14 +15,15 @@ if not raw_dsn:
 result = urlparse(raw_dsn)
 
 conn = psycopg2.connect(
-    dbname=result.path[1:],          # eliminar la /
+    dbname=result.path[1:],  # eliminar la /
     user=result.username,
     password=result.password,
     host=result.hostname,
-    port=result.port
+    port=result.port,
 )
 
 conn.autocommit = True
+
 
 def get_cursor():
     return conn.cursor()

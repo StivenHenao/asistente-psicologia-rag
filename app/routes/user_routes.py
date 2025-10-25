@@ -1,12 +1,15 @@
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
-from app.db import get_cursor
-from app.core.security import verify_api_key
-from app.utils.encryption import encrypt_text
 import json
-import random
+import secrets
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+
+from app.core.security import verify_api_key
+from app.db import get_cursor
+from app.utils.encryption import encrypt_text
 
 router = APIRouter()
+
 
 class UserCreate(BaseModel):
     email: str
@@ -18,12 +21,14 @@ class UserCreate(BaseModel):
     factor3: str
     active: bool = True
 
+
 def generate_voice_code(cur):
     while True:
-        code = ''.join(random.choices("0123456789", k=4))
+        code = "".join(secrets.choices("0123456789", k=4))
         cur.execute("SELECT id FROM users WHERE voice_code = %s", (code,))
         if not cur.fetchone():
             return code
+
 
 @router.post("/users")
 def create_user(user: UserCreate, dependencies=[Depends(verify_api_key)]):
@@ -42,19 +47,34 @@ def create_user(user: UserCreate, dependencies=[Depends(verify_api_key)]):
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
             """,
-            (user.email, user.name, user.age, user.city, f1, f2, f3, voice_code, user.active)
+            (
+                user.email,
+                user.name,
+                user.age,
+                user.city,
+                f1,
+                f2,
+                f3,
+                voice_code,
+                user.active,
+            ),
         )
         user_id = cur.fetchone()[0]
 
         cur.execute(
             "INSERT INTO user_contexts (user_id, structured_context, encrypted) VALUES (%s, %s::jsonb, FALSE)",
-            (user_id, json.dumps({"gustos": [], "actividad_favorita": None, "preferencias": {}}))
+            (
+                user_id,
+                json.dumps(
+                    {"gustos": [], "actividad_favorita": None, "preferencias": {}}
+                ),
+            ),
         )
 
         return {
             "id": user_id,
             "voice_code": voice_code,
-            "message": "Usuario creado exitosamente"
+            "message": "Usuario creado exitosamente",
         }
 
     except Exception as e:

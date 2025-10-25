@@ -1,13 +1,12 @@
 from dotenv import load_dotenv
-import os
 
 # Cargar variables de entorno del archivo .env
 load_dotenv()
 
-from chatbot.core.redis_client import get_session, session_ttl, delete_session
-from chatbot.db.cursor import get_cursor
 from chatbot.auth.authentication import authenticate_user
 from chatbot.chat.chat_loop import chat_loop
+from chatbot.core.redis_client import delete_session, get_session, session_ttl
+from chatbot.db.cursor import get_cursor
 
 if __name__ == "__main__":
     user_id = get_session()

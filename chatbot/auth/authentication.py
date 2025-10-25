@@ -1,17 +1,20 @@
 import time
-from chatbot.core.tts_engine import speak
-from chatbot.core.whisper_engine import record_audio, transcribe_audio
-from chatbot.core.gemini_service import generate_question, validate_answer
-from chatbot.core.redis_client import save_session
-from chatbot.db.cursor import get_cursor
+
 from app.utils.encryption import decrypt_text
 from chatbot.chat.chat_loop import chat_loop
+from chatbot.core.gemini_service import generate_question, validate_answer
+from chatbot.core.redis_client import save_session
+from chatbot.core.tts_engine import speak
+from chatbot.core.whisper_engine import record_audio, transcribe_audio
+from chatbot.db.cursor import get_cursor
+
 
 def record_and_transcribe_code():
     speak("Por favor, diga su código de voz de cuatro dígitos.")
     audio = record_audio(duration=5)
-    code = ''.join(filter(str.isdigit, transcribe_audio(audio)))
+    code = "".join(filter(str.isdigit, transcribe_audio(audio)))
     return code if len(code) == 4 else None
+
 
 def authenticate_user():
     cur = get_cursor()

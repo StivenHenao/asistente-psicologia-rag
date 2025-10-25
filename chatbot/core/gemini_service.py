@@ -1,8 +1,10 @@
 import os
+
 import google.generativeai as genai
 
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
 model = genai.GenerativeModel("models/gemini-2.0-flash")
+
 
 def safe_get_text(response):
     if hasattr(response, "text") and response.text:
@@ -12,6 +14,7 @@ def safe_get_text(response):
         if parts and hasattr(parts[0], "text"):
             return parts[0].text
     return ""
+
 
 def generate_question(factor_value):
     """
@@ -47,6 +50,7 @@ def generate_question(factor_value):
     except Exception as e:
         print(f"❌ Error con Gemini (pregunta): {e}")
         return f"Responde algo relacionado con {factor_value}."
+
 
 def validate_answer(factor_value, answer):
     prompt = (

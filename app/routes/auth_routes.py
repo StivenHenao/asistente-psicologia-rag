@@ -1,26 +1,29 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+
 from app.db import get_cursor
 from app.utils.whisper_utils import record_and_transcribe
 
 router = APIRouter()
 
+
 class VoiceAuthRequest(BaseModel):
-    voice_code: str = None   # opcional si usas Whisper
+    voice_code: str = None  # opcional si usas Whisper
     factor1: str
     factor2: str
     factor3: str
 
+
 @router.post("/auth/verify-voice")
 def verify_voice(body: VoiceAuthRequest):
     cur = get_cursor()
-    
+
     # Si no se pasa voice_code, usar Whisper
     voice_code = body.voice_code or record_and_transcribe()
-    
+
     cur.execute(
         "SELECT id, factor1, factor2, factor3, active FROM users WHERE voice_code = %s",
-        (voice_code,)
+        (voice_code,),
     )
     row = cur.fetchone()
     if not row:
@@ -35,7 +38,10 @@ def verify_voice(body: VoiceAuthRequest):
         raise HTTPException(status_code=401, detail="Factores incorrectos")
 
     # Cargar contexto
-    cur.execute("SELECT structured_context, encrypted FROM user_contexts WHERE user_id = %s", (user_id,))
+    cur.execute(
+        "SELECT structured_context, encrypted FROM user_contexts WHERE user_id = %s",
+        (user_id,),
+    )
     context_row = cur.fetchone()
     context = context_row[0] if context_row else {}
 

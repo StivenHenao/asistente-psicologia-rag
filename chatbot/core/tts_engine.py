@@ -1,8 +1,10 @@
 import os
 import tempfile
 import time
+
 import pygame
 from gtts import gTTS
+
 
 def speak(text: str):
     try:

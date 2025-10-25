@@ -1,5 +1,7 @@
-import psycopg2
 import os
+
+import psycopg2
+
 
 def get_connection():
     """Devuelve una conexión activa a la base de datos."""
@@ -9,7 +11,7 @@ def get_connection():
             database=os.getenv("DB_NAME", "langchain_db"),
             user=os.getenv("DB_USER", "postgres"),
             password=os.getenv("DB_PASSWORD", "1234"),
-            port=os.getenv("DB_PORT", "5432")
+            port=os.getenv("DB_PORT", "5432"),
         )
         return conn
     except Exception as e:
