@@ -8,8 +8,13 @@ def chat_loop(user_id, name):
     speak(f"Hola {name}, ya estás autenticado. ¿En qué puedo ayudarte hoy?")
 
     while True:
-        audio = record_audio(duration=5)
-        user_input = transcribe_audio(audio).lower()
+        # --------- WHISPER DESACTIVADO PARA PRUEBAS ---------
+        # audio = record_audio(duration=5)
+        # user_input = transcribe_audio(audio).lower()
+        
+        # --------- entrada de texto manual ---------
+        user_input = input("Escribe tu pregunta -> ").lower()
+        
         print(f"Tú dijiste: {user_input}")
 
         if any(
@@ -20,8 +25,13 @@ def chat_loop(user_id, name):
             break
 
         try:
+            
+            # --------- uso de gemini sin intervención ni contexto ---------
             response = model.generate_content(user_input)
             ai_text = response.text.strip()
+            # response = 
+            # ai_text =   
+            
             speak(ai_text)
             print(f"IA: {ai_text}")
         except Exception as e:
