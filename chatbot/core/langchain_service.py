@@ -1,10 +1,12 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
 import os
-from chatbot.chromadb_utils import load_chroma_db_data 
+
 from dotenv import load_dotenv
-from chatbot.core.system_prompt_template import prompt 
-from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+from chatbot.chromadb_utils import load_chroma_db_data
+from chatbot.core.system_prompt_template import prompt
 
 load_dotenv()
 

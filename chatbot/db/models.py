@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String, JSON
-from sqlalchemy import DateTime, Boolean
+from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String
 from sqlalchemy.sql import func
+
 from chatbot.db.database import Base
+
 
 class User(Base):
     __tablename__ = "users" 

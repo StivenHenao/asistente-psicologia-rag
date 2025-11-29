@@ -1,6 +1,8 @@
 import os
+
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
+
 
 def load_vectorstore():
     current_dir = os.path.dirname(os.path.abspath(__file__))

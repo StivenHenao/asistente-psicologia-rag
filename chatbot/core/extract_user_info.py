@@ -1,8 +1,9 @@
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from chatbot.core.langchain_service import llm
 import json
 
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import PromptTemplate
+
+from chatbot.core.langchain_service import llm
 
 extract_prompt = PromptTemplate.from_template("""
 =================================== INSTRUCCIONES DEL SISTEMA ================================\n

@@ -1,6 +1,9 @@
-from chatbot.db.models import User
-from chatbot.db.database import SessionLocal
 from typing import List, Optional
+
+from chatbot.db.database import SessionLocal
+from chatbot.db.models import User
+
+
 class UserRepository:
     def __init__(self):
         self.db = SessionLocal()

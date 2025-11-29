@@ -1,6 +1,8 @@
 
 from chatbot.core.extract_user_info import extract_user_info
 from chatbot.core.langchain_service import rag_chain
+
+
 # dentro de esta usamos las funcionalidades de langchain y la cadena que nos permite extraer
 # información, dar respuesta y almacenar información (contexto)
 def handle_chat_flow(user_input, user_context):
