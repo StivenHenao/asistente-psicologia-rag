@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, JSON
-from sqlalchemy import Column, Integer, JSON, DateTime, Boolean, ForeignKey
+from sqlalchemy import DateTime, Boolean
 from sqlalchemy.sql import func
 from chatbot.db.database import Base
 

@@ -1,7 +1,5 @@
-from chatbot.core.gemini_service import model
 from chatbot.core.redis_client import delete_session
 from chatbot.core.tts_engine import speak
-from chatbot.core.whisper_engine import record_audio, transcribe_audio
 from chatbot.core.chat_chain import handle_chat_flow
 from chatbot.db.user_repository import UserRepository
 

@@ -7,7 +7,7 @@ def load_vectorstore():
     db_path = os.path.abspath(os.path.join(current_dir, "..", "..", "chroma_db"))
 
     if not os.path.exists(db_path):
-        print(f"ERROR: La carpeta de base de datos no existe en la ruta calculada.")
+        print("ERROR: La carpeta de base de datos no existe en la ruta calculada.")
         return None
 
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
