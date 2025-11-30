@@ -24,7 +24,7 @@ class UserCreate(BaseModel):
 
 def generate_voice_code(cur):
     while True:
-        code = "".join(secrets.choices("0123456789", k=4))
+        code = "".join(secrets.choice("0123456789") for _ in range(4))
         cur.execute("SELECT id FROM users WHERE voice_code = %s", (code,))
         if not cur.fetchone():
             return code

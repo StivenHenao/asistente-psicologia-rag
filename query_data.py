@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 # Load environment variables
 load_dotenv()
 
-CHROMA_PATH = "chroma"
+CHROMA_PATH = "./chroma_db"
 
 PROMPT_TEMPLATE = """
 Eres un asistente de apoyo psicologico y emocional enfocado para personas que sufren de ansiedad y depresion.
