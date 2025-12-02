@@ -61,16 +61,6 @@ def create_user(user: UserCreate, dependencies=[Depends(verify_api_key)]):
         )
         user_id = cur.fetchone()[0]
 
-        cur.execute(
-            "INSERT INTO user_contexts (user_id, structured_context, encrypted) VALUES (%s, %s::jsonb, FALSE)",
-            (
-                user_id,
-                json.dumps(
-                    {"gustos": [], "actividad_favorita": None, "preferencias": {}}
-                ),
-            ),
-        )
-
         return {
             "id": user_id,
             "voice_code": voice_code,
