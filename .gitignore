@@ -5,7 +5,6 @@ env/
 
 # Archivos de dependencias
 uv.lock
-requirements.txt
 
 # Archivos de configuración sensibles
 .env
@@ -28,3 +27,5 @@ chroma_*
 # Archivos o carpetas locales (no subir al repo)
 .chatbot/
 .notebooks/
+
+recording*

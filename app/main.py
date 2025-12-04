@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import auth_routes, context_routes, report_routes, user_routes
+from app.routes import auth_routes, context_routes, report_routes, user_routes, esp32_routes
 from app.services.email.resend_email_service import ResendEmailService
 import os
 
@@ -17,3 +17,4 @@ app.include_router(user_routes.router, tags=["Users"])
 app.include_router(auth_routes.router, tags=["Auth"])
 app.include_router(context_routes.router, tags=["Context"])
 app.include_router(report_routes.router, tags=["Reports"])
+app.include_router(esp32_routes.router, tags=["ESP32"])
