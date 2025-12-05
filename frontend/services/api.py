@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import time
-import random
+import secrets
 import os
 from dotenv import load_dotenv
 
@@ -56,7 +56,8 @@ class ApiService:
         if st.session_state.get('use_mock', True):
             time.sleep(1) # Simular latencia de red
             new_id = len(MOCK_USERS) + 1
-            voice_code = f"{random.randint(1000,9999)}"
+            # Usamos secrets que es criptográficamente seguro y SonarCloud lo ama
+            voice_code = "".join(secrets.choice("0123456789") for _ in range(4))
             # Crear copia local para la sesión
             mock_user = {
                 "id": new_id, 
