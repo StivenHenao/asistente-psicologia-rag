@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from services.api import ApiService
+import base64
 
 def render_users_view():
     st.title("👥 Gestión de Pacientes")
@@ -142,7 +143,9 @@ def render_users_view():
                 with col_gen:
                     st.markdown("**Informe Psicológico (IA)**")
                     st.caption("Genera un PDF profesional basado en el contexto y factores del paciente.")
-                    generate_btn = st.button("📄 Generar Informe", key=f"gen_btn_{selected_user['id']}")
+                    
+                    # Botón para generar
+                    generate_btn = st.button("📄 Generar y Previsualizar", key=f"gen_btn_{selected_user['id']}")
 
                 with col_info:
                     if generate_btn:
@@ -151,13 +154,27 @@ def render_users_view():
 
                         if report_res.get('success'):
                             st.success("¡Informe generado correctamente!")
+                            
+                            # 1. BOTÓN DE DESCARGA (Siempre útil tenerlo a mano)
                             st.download_button(
-                                label="⬇️ Descargar PDF",
+                                label="⬇️ Descargar PDF Ahora",
                                 data=report_res['data'],
                                 file_name=report_res['filename'],
                                 mime="application/pdf",
                                 key=f"dl_btn_{selected_user['id']}"
                             )
+                            
+                            # 2. VISUALIZADOR PDF (El truco del iframe)
+                            # Convertimos los bytes a base64
+                            base64_pdf = base64.b64encode(report_res['data']).decode('utf-8')
+                            
+                            # Creamos un iframe HTML que renderiza el PDF
+                            pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="700" type="application/pdf"></iframe>'
+                            
+                            # Lo mostramos en Streamlit permitiendo HTML inseguro (es necesario para iframes)
+                            st.markdown("### 👁️ Vista Previa")
+                            st.markdown(pdf_display, unsafe_allow_html=True)
+                            
                         else:
                             st.error(f"Error al generar: {report_res.get('error')}")
 
