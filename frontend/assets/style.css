@@ -1,0 +1,33 @@
+/* Importar una fuente amigable */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Nunito', sans-serif;
+}
+
+/* Tarjetas suaves para los contenedores */
+div[data-testid="stForm"] {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #E0E0E0;
+}
+
+/* Botones personalizados */
+div.stButton > button {
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+div.stButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(108, 99, 255, 0.2);
+}
+
+/* Tablas más limpias */
+div[data-testid="stDataFrame"] {
+    border-radius: 10px;
+    overflow: hidden;
+}
