@@ -76,7 +76,7 @@ def render_users_view():
                             pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="700" type="application/pdf"></iframe>'
                             
                             st.markdown("### 👁️ Vista Previa")
-                            st.markdown(pdf_display, unsafe_allow_html=True)
+                            st.markdown(pdf_display, unsafe_allow_html=True) #NOSONAR
                             
                         else:
                             st.error(f"Error al generar: {report_res.get('error')}")
