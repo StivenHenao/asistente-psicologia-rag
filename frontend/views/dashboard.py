@@ -8,7 +8,7 @@ def render_dashboard():
     Renderiza la vista principal con métricas y gráficos.
     """
     st.title("DASHBOARD")
-    st.markdown("Monitoreo en tiempo real de pacientes y uso del asistente RAG.")
+    st.markdown("Monitoreo en tiempo real de pacientes.")
     
     # 1. Obtener datos (Usando el servicio desacoplado)
     with st.spinner("Cargando métricas..."):
@@ -28,7 +28,7 @@ def render_dashboard():
     
     # 2. Tarjetas de Métricas (KPIs)
     # Usamos columnas para distribuir el espacio
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3 = st.columns(3)
     
     c1.metric(
         label="Pacientes Totales", 
@@ -45,11 +45,6 @@ def render_dashboard():
         label="Edad Promedio", 
         value=f"{avg_age} años", 
         delta="Estable"
-    )
-    c4.metric(
-        label="Consultas RAG", 
-        value="1,204", 
-        delta="+15%"
     )
     
     st.markdown("---")
@@ -103,10 +98,25 @@ def render_dashboard():
         st.warning("⚠️ No hay suficientes datos para generar las gráficas. Registra usuarios en la pestaña 'Gestión'.")
 
     # 4. Accesos Rápidos (Bonus UX)
-    st.markdown("### 🚀 Accesos Rápidos")
+    st.markdown("### Accesos Rápidos")
     col_q1, col_q2 = st.columns(2)
+    
     with col_q1:
-        st.info("💡 **Tip:** Revisa la sección 'Base de Conocimiento' para verificar qué PDFs ha indexado ChromaDB.")
+        # Reemplazo del TIP por algo funcional: Descarga de CSV
+        if not df.empty:
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label=" Descargar Reporte General (CSV)",
+                data=csv,
+                file_name="reporte_pacientes_gisee.csv",
+                mime="text/csv",
+                use_container_width=True,
+                help="Descarga la lista completa de pacientes y estados en formato Excel/CSV."
+            )
+        else:
+            st.warning("No hay datos para descargar aún.")
+
     with col_q2:
-        if st.button("🔄 Refrescar Datos del Dashboard"):
+        # Botón de refrescar con ancho completo para simetría
+        if st.button(" Refrescar Datos del Dashboard", use_container_width=True):
             st.rerun()

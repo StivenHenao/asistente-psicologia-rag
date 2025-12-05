@@ -1,31 +1,42 @@
 import streamlit as st
+import os
+
 
 def render_sidebar():
     """
     Renderiza la barra lateral de navegación y gestiona el estado de la vista.
     """
     with st.sidebar:
-        # Logo y Título con un poco de HTML/CSS inline para estilo
-        st.markdown("""
-        <div style="display: flex; align-items: center; margin-bottom: 20px;">
-            <div style="background-color: #6C63FF; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <span style="color: white; font-size: 24px;">🧠</span>
-            </div>
-            <div>
-                <h3 style="margin: 0; font-size: 1.4rem; color: #1F2937; font-weight: 700;">Gisee</h3>
-                <small style="color: #6B7280; font-weight: 500;">Admin Console</small>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        # --- LOGO E IDENTIDAD ---
+        # 1. Definir la ruta de la imagen de forma robusta (Ingeniero Pro)
+        # Esto busca la ruta donde está ESTE archivo (sidebar.py) y baja a assets
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        logo_path = os.path.join(current_dir, "..", "assets", "logo.png")
+
+        # 2. Centrar la imagen usando columnas
+        col_logo, col_text = st.columns([1, 2])
         
+        with col_logo:
+            # Verificamos si existe para que no explote si se borra el archivo
+            if os.path.exists(logo_path):
+                st.image(logo_path, width=80) 
+            else:
+                st.warning("⚠️ logo.png")
+
+        with col_text:
+            # Alineación vertical simulada con markdown
+            st.markdown("""
+            <div style="margin-top: 15px;">
+                <h3 style="margin: 0; font-size: 1.6rem; color: #FFFFFF; font-weight: 800; letter-spacing: -1px;">Gisee</h3>
+            </div>
+            """, unsafe_allow_html=True)
         st.markdown("---")
         
         # Opciones del Menú
         # Usamos un diccionario para mapear claves internas a textos legibles
         menu_options = {
-            "dashboard": "📊 Dashboard General",
-            "users": "👥 Gestión de Pacientes",
-            "settings": "⚙️ Configuración"
+            "dashboard": " Dashboard General",
+            "users": " Gestión de Pacientes"
         }
         
         # Renderizar el radio button estilizado
@@ -44,7 +55,7 @@ def render_sidebar():
         
         # Zona de Control de Estado (Mock vs Real)
         # Útil para desarrollo vs producción
-        with st.expander("🔌 Estado del Sistema", expanded=True):
+        with st.expander(" Estado del Sistema", expanded=True):
             if 'use_mock' not in st.session_state:
                 st.session_state.use_mock = True
 
