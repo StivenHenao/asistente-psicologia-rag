@@ -20,7 +20,7 @@ from reportlab.platypus import (
     TableStyle,
 )
 
-from app.db import get_cursor
+from app.db import get_cursor, release_connection
 from app.utils.encryption import decrypt_context
 
 load_dotenv()
@@ -281,46 +281,49 @@ def generate_user_report(user_id: int):
     Returns:
         PDF con el informe médico
     """
-    cur = get_cursor()
+    cur, conn = get_cursor()
+    try:
 
-    # Obtener datos del usuario y su contexto
-    cur.execute(
-        "SELECT id, email, name, age, city, context, encrypted FROM users WHERE id = %s",
-        (user_id,),
-    )
-    user_row = cur.fetchone()
+        # Obtener datos del usuario y su contexto
+        cur.execute(
+            "SELECT id, email, name, age, city, context, encrypted FROM users WHERE id = %s",
+            (user_id,),
+        )
+        user_row = cur.fetchone()
 
-    if not user_row:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        if not user_row:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    user_data = {
-        "id": user_row[0],
-        "email": user_row[1],
-        "name": user_row[2],
-        "age": user_row[3],
-        "city": user_row[4],
-    }
+        user_data = {
+            "id": user_row["id"],
+            "email": user_row["email"],
+            "name": user_row["name"],
+            "age": user_row["age"],
+            "city": user_row["city"],
+        }
 
-    context_data = user_row[5]
-    encrypted = user_row[6]
+        context_data = user_row["context"]
+        encrypted = user_row["encrypted"]
 
-    if not context_data:
-        raise HTTPException(status_code=404, detail="Contexto de usuario no encontrado")
+        if not context_data:
+            raise HTTPException(status_code=404, detail="Contexto de usuario no encontrado")
 
-    if encrypted:
-        context_data = decrypt_context(context_data)
+        if encrypted:
+            context_data = decrypt_context(context_data)
 
-    # Generar el contenido del informe con IA
-    report_content = generate_medical_report(user_data, context_data)
+        # Generar el contenido del informe con IA
+        report_content = generate_medical_report(user_data, context_data)
 
-    # Crear el PDF
-    pdf_buffer = create_pdf_report(user_data, context_data, report_content)
+        # Crear el PDF
+        pdf_buffer = create_pdf_report(user_data, context_data, report_content)
 
-    # Nombre del archivo
-    filename = f"informe_psicologico_{user_data['name'].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.pdf"
+        # Nombre del archivo
+        filename = f"informe_psicologico_{user_data['name'].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.pdf"
 
-    return StreamingResponse(
-        pdf_buffer,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename={filename}"},
-    )
+        return StreamingResponse(
+            pdf_buffer,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+    finally:
+        release_connection(conn)

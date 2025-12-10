@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
 from app.core.security import verify_api_key
-from app.db import get_cursor
+from app.db import get_cursor, release_connection
 from app.utils.encryption import encrypt_text
 from app.templates import render_template, WELCOME_EMAIL
 
@@ -43,31 +43,35 @@ def generate_voice_code(cur):
 
 @router.post("/users", dependencies=[Depends(verify_api_key)])
 async def create_user(user: UserCreate, request: Request):
-    cur = get_cursor()
-    conn = cur.connection
+    cur, conn = get_cursor()
 
     try:
         voice_code = generate_voice_code(cur)
 
-        # Encriptar factores
         f1 = encrypt_text(user.factor1)
         f2 = encrypt_text(user.factor2)
         f3 = encrypt_text(user.factor3)
 
         cur.execute(
             """
-            INSERT INTO users (email, name, age, city, factor1, factor2, factor3, voice_code, active, context)
+            INSERT INTO users (
+                email, name, age, city, factor1, factor2, factor3,
+                voice_code, active, context
+            )
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s::jsonb)
             RETURNING id
             """,
-            (user.email, user.name, user.age, user.city, f1, f2, f3, voice_code, user.active, json.dumps({"gustos": [], "actividad_favorita": None, "preferencias": {}}))
+            (
+                user.email, user.name, user.age, user.city,
+                f1, f2, f3, voice_code,
+                user.active,
+                json.dumps({"gustos": [], "actividad_favorita": None, "preferencias": {}})
+            ),
         )
 
-        user_id = cur.fetchone()[0]
-
+        user_id = cur.fetchone()["id"]
         conn.commit()
-        
-        # Usar el template desde archivo
+
         html_content = render_template(
             WELCOME_EMAIL,
             name=user.name,
@@ -76,81 +80,115 @@ async def create_user(user: UserCreate, request: Request):
             factor2=user.factor2,
             factor3=user.factor3,
         )
-        
-        # Acceder al servicio de email
+
         email_service = request.app.state.email_service
         await email_service.send_email(
             to=user.email,
             subject="Bienvenido a Gisee",
             html=html_content,
         )
-        
-        return {"id": user_id, "voice_code": voice_code, "message": "Usuario creado exitosamente"}
+
+        return {
+            "id": user_id,
+            "voice_code": voice_code,
+            "message": "Usuario creado exitosamente"
+        }
 
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
+    finally:
+        release_connection(conn)
+
 
 @router.get("/users", dependencies=[Depends(verify_api_key)])
 def list_users():
-    cur = get_cursor()
-    cur.execute(
-        "SELECT id, email, name, age, city, voice_code, active FROM users"
-    )
-    rows = cur.fetchall()
-    users = [
-        {
-            "id": row[0],
-            "email": row[1],
-            "name": row[2],
-            "age": row[3],
-            "city": row[4],
-            "voice_code": row[5],
-            "active": row[6],
-        }
-        for row in rows
-    ]
-    return {"users": users}
+    cur, conn = get_cursor()
+    try:
+        cur.execute(
+            "SELECT id, email, name, age, city, voice_code, active FROM users"
+        )
+        rows = cur.fetchall()
+
+        users = [
+            {
+                "id": row["id"],
+                "email": row["email"],
+                "name": row["name"],
+                "age": row["age"],
+                "city": row["city"],
+                "voice_code": row["voice_code"],
+                "active": row["active"],
+            }
+            for row in rows
+        ]
+
+        return {"users": users}
+
+    finally:
+        release_connection(conn)
 
 
 @router.get("/users/{user_id}", dependencies=[Depends(verify_api_key)])
 def get_user(user_id: int):
-    cur = get_cursor()
-    cur.execute(
-        "SELECT id, email, name, age, city, voice_code, active FROM users WHERE id = %s",
-        (user_id,),
-    )
-    row = cur.fetchone()
-    if not row:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    cur, conn = get_cursor()
+    try:
+        cur.execute(
+            """
+            SELECT id, email, name, age, city, voice_code, active
+            FROM users WHERE id = %s
+            """,
+            (user_id,),
+        )
+        row = cur.fetchone()
 
-    user = {
-        "id": row[0],
-        "email": row[1],
-        "name": row[2],
-        "age": row[3],
-        "city": row[4],
-        "voice_code": row[5],
-        "active": row[6],
-    }
-    return {"user": user}
+        if not row:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+        return {
+            "user": {
+                "id": row["id"],
+                "email": row["email"],
+                "name": row["name"],
+                "age": row["age"],
+                "city": row["city"],
+                "voice_code": row["voice_code"],
+                "active": row["active"],
+            }
+        }
+
+    finally:
+        release_connection(conn)
 
 
 @router.delete("/users/{user_id}", dependencies=[Depends(verify_api_key)])
 def delete_user(user_id: int):
-    cur = get_cursor()
-    cur.execute("DELETE FROM users WHERE id = %s RETURNING id", (user_id,))
-    row = cur.fetchone()
-    if not row:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return {"message": "Usuario eliminado exitosamente", "user_id": user_id}
+    cur, conn = get_cursor()
+    try:
+        cur.execute(
+            "DELETE FROM users WHERE id = %s RETURNING id",
+            (user_id,)
+        )
+        row = cur.fetchone()
+
+        if not row:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+        conn.commit()
+        return {"message": "Usuario eliminado exitosamente", "user_id": user_id}
+
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+    finally:
+        release_connection(conn)
 
 
 @router.put("/users/{user_id}", dependencies=[Depends(verify_api_key)])
 async def update_user(user_id: int, user: UserUpdate, request: Request):
-    cur = get_cursor()
-    conn = cur.connection
+    cur, conn = get_cursor()
 
     try:
         # Variables para controlar si hubo cambios en factores
@@ -223,8 +261,8 @@ async def update_user(user_id: int, user: UserUpdate, request: Request):
             user_row = cur.fetchone()
             if user_row:
                 user_data = {
-                    'email': user_row[0],
-                    'name': user_row[1]
+                    'email': user_row["email"],
+                    'name': user_row["name"]
                 }
 
         # Añadir ID al final
@@ -267,10 +305,10 @@ async def update_user(user_id: int, user: UserUpdate, request: Request):
                 from app.utils.encryption import decrypt_text
                 
                 all_factors = {
-                    'factor1': decrypt_text(factors_row[0]) if factors_row[0] else '',
-                    'factor2': decrypt_text(factors_row[1]) if factors_row[1] else '',
-                    'factor3': decrypt_text(factors_row[2]) if factors_row[2] else '',
-                    'voice_code': factors_row[3]
+                    'factor1': decrypt_text(factors_row["f1"]) if factors_row["f1"] else '',
+                    'factor2': decrypt_text(factors_row["f2"]) if factors_row["f2"] else '',
+                    'factor3': decrypt_text(factors_row["f3"]) if factors_row["f3"] else '',
+                    'voice_code': factors_row["voice_code"]
                 }
                 
                 from app.templates import render_template, FACTOR_UPDATED_EMAIL
@@ -302,3 +340,6 @@ async def update_user(user_id: int, user: UserUpdate, request: Request):
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
+    
+    finally:
+        release_connection(conn)
